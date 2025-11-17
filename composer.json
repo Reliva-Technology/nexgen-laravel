@@ -1,0 +1,29 @@
+{
+    "name": "reliva/nexgen",
+    "description": "Nexgen Payment Gateway Integration for Laravel",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jhanarthananraja Nagaraja",
+            "email": "jhanarthananraja@reliva.com.my"
+        }
+    ],
+    "require": {
+        "php": "^8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Reliva\\Nexgen\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Reliva\\Nexgen\\NexgenServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
