@@ -140,7 +140,17 @@ class NexgenQRClient
             'ApiKey' => $this->apiKey,
         ])->get($url);
 
-        return new NexgenResponse($response->successful(), $response->json());
+    $ret = [
+        'response' => $response,
+        'url' => $url,
+        'params' => $params,
+        'apiKey' => $this->apiKey,
+        'apiSecret' => $this->apiSecret,
+        'endpoint' => $this->endpoint,
+        'urlPath' => $urlPath,
+    ];
+
+        return new NexgenResponse($response->successful(), $ret);
     }
 
     private function makePostRequest(String $urlPath, array $data = [], array $params = [])
