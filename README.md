@@ -230,10 +230,10 @@ if ($response->isSuccess()) {
 | `fieldExternalReferenceLabel2` | string | No | Custom reference label #2 |
 | `fieldExternalReferenceLabel3` | string | No | Custom reference label #3 |
 | `fieldExternalReferenceLabel4` | string | No | Custom reference label #4 |
-| `fieldExternalReferenceValue1` | string | No | Custom reference value #1 |
-| `fieldExternalReferenceValue2` | string | No | Custom reference value #2 |
-| `fieldExternalReferenceValue3` | string | No | Custom reference value #3 |
-| `fieldExternalReferenceValue4` | string | No | Custom reference value #4 |
+| `fieldExternalReferenceValue1` | string | No | Custom reference value #1 (required if `fieldExternalReferenceLabel1`) provided |
+| `fieldExternalReferenceValue2` | string | No | Custom reference value #2 (required if `fieldExternalReferenceLabel2`) provided |
+| `fieldExternalReferenceValue3` | string | No | Custom reference value #3 (required if `fieldExternalReferenceLabel3`) provided |
+| `fieldExternalReferenceValue4` | string | No | Custom reference value #4 (required if `fieldExternalReferenceLabel4`) provided |
 
 ### Get Billing Data
 
@@ -466,6 +466,7 @@ The webhook payload includes the following fields:
     "customer_bank_type": "RET"
   }
 }
+
 ```
 
 **Important Notes:**

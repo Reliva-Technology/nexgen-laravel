@@ -4,7 +4,7 @@ namespace Reliva\Nexgen;
 
 use Reliva\Nexgen\Enum\NexgenCollectionStatus;
 
-class NexgenCreateCollection
+class NexgenCreateTerminal
 {
     public String $name;
     public String $description;
