@@ -23,11 +23,24 @@ class NexgenServiceProvider extends IlluminateServiceProvider
 
         // Register any service bindings here
         $this->app->singleton('nexgen', function ($app) {
-            return new NexgenClient();
+            return new NexgenClient(
+                config('nexgen.API_KEY'),
+                config('nexgen.API_SECRET'),
+                config('nexgen.ENVIRONMENT'),
+                config('nexgen.COLLECTION_CODE'),
+                config('nexgen.CALLBACK_URL'),
+                config('nexgen.REDIRECT_URL'),
+            );
         });
 
         $this->app->singleton('nexgen-qr', function ($app) {
-            return new NexgenQRClient();
+            return new NexgenQRClient(
+                config('nexgen.API_KEY'),
+                config('nexgen.API_SECRET'),
+                config('nexgen.QR_ENVIRONMENT'),
+                config('nexgen.QR_TERMINAL_CODE'),
+                config('nexgen.QR_CALLBACK_URL'),
+            );
         });
     }
 

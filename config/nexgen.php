@@ -1,4 +1,7 @@
 <?php 
+
+use Reliva\Nexgen\Enum\NexgenEnvironment;
+
 return [
     // Nexgen API configuration
 
@@ -14,7 +17,7 @@ return [
 
     // The environment for Nexgen API requests.
     // Supported: 'sandbox', 'production', 'custom'
-    'ENVIRONMENT' => env('NEXGEN_ENVIRONMENT', 'sandbox'),
+    'ENVIRONMENT' => env('NEXGEN_ENVIRONMENT', NexgenEnvironment::SANDBOX),
 
     // Your Nexgen API Key (find this in your Nexgen dashboard).
     'API_KEY' => env('NEXGEN_API_KEY'),
