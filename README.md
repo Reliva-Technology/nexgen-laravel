@@ -43,7 +43,7 @@ This will create a `config/nexgen.php` file in your Laravel application.
 
 Add the following environment variables to your `.env` file:
 
-```env
+```text
 NEXGEN_ENVIRONMENT=sandbox
 NEXGEN_API_KEY=your_api_key_here
 NEXGEN_API_SECRET=your_api_secret_here
@@ -84,14 +84,13 @@ The package automatically registers a service container binding. You can access 
 ```php
 use Reliva\Nexgen\NexgenClient;
 
-// Via service container
-$nexgen = app('nexgen');
+// Initialize the NexgenClient instance
+protected NexgenClient $client;
 
-// Or via dependency injection
-public function __construct(NexgenClient $nexgen)
-{
-    $this->nexgen = $nexgen;
-}
+    public function __construct()
+    {
+        $this->client = new NexgenClient();
+    }
 ```
 
 ### Manual Instantiation
@@ -118,14 +117,15 @@ For QR code payments, use the `NexgenQRClient`:
 ```php
 use Reliva\Nexgen\NexgenQRClient;
 
-// Via service container
-$nexgenQR = app('nexgen-qr');
 
-// Or via dependency injection
-public function __construct(NexgenQRClient $nexgenQR)
+// Initialize the NexgenQRClient instance
+protected NexgenQRClient $client;
+
+public function __construct()
 {
-    $this->nexgenQR = $nexgenQR;
+    $this->client = new NexgenQRClient();
 }
+
 
 // Or manual instantiation
 $nexgenQR = new NexgenQRClient(
