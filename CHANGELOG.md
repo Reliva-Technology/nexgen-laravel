@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `NexgenQRClient` class for QR code payment functionality
+- Terminal management:
+  - Create new terminals
+  - Get terminal list
+  - Get terminal data
+  - Get terminal data with billing list
+- Dynamic QR code generation:
+  - Create dynamic QR codes for payments
+  - Get QR code data by code
+- QR-specific configuration options:
+  - `QR_ENVIRONMENT` (production or custom)
+  - `QR_TERMINAL_CODE`
+  - `QR_CALLBACK_URL`
+  - `QR_ENDPOINT` for custom environments
+
+### Changed
+- Removed `NexgenEnvironment` enum - environments now use string values ('sandbox', 'production', 'custom')
+- `NexgenClient` constructor now accepts string environment instead of enum
+
 ## [1.0.0] - 2024-12-XX
 
 ### Added
@@ -31,7 +51,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Default collection code, callback URL, and redirect URL configuration
 - Service provider for Laravel auto-discovery
 - Type-safe enums:
-  - `NexgenEnvironment` enum (sandbox, production, custom)
   - `NexgenCollectionStatus` enum (active, inactive)
 - Data transfer objects:
   - `NexgenCreateCollection` for collection creation

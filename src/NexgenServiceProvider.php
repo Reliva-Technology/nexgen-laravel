@@ -5,6 +5,7 @@ namespace Reliva\Nexgen;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 
 use Reliva\Nexgen\NexgenClient;
+use Reliva\Nexgen\NexgenQRClient;
 
 class NexgenServiceProvider extends IlluminateServiceProvider
 {

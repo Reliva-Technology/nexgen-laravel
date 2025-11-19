@@ -7,8 +7,10 @@ A Laravel package for seamless integration with the Nexgen Payment Gateway API. 
 - 🚀 **Easy Integration** - Simple setup and configuration
 - 📦 **Collection Management** - Create and manage payment collections
 - 💳 **Billing Management** - Create and track payment bills
+- 📱 **QR Code Payments** - Generate dynamic QR codes for payments via terminals
+- 🏪 **Terminal Management** - Create and manage payment terminals
 - 🔄 **Environment Support** - Sandbox, Production, and Custom environments
-- ✅ **Type Safety** - Built with PHP 8.1+ enums and type hints
+- ✅ **Type Safety** - Built with PHP 8.1+ type hints
 - 🛡️ **Secure** - API key and secret authentication
 
 ## Requirements
@@ -49,6 +51,12 @@ NEXGEN_COLLECTION_CODE=your_collection_code_here
 NEXGEN_CALLBACK_URL=https://your-domain.com/callback
 NEXGEN_REDIRECT_URL=https://your-domain.com/redirect
 NEXGEN_CUSTOM_ENDPOINT=https://custom-endpoint.com
+
+# QR Code Payment Configuration
+NEXGEN_QR_ENVIRONMENT=production
+NEXGEN_QR_TERMINAL_CODE=your_terminal_code_here
+NEXGEN_QR_CALLBACK_URL=https://your-domain.com/qr-callback
+NEXGEN_QR_CUSTOM_ENDPOINT=https://custom-qr-endpoint.com
 ```
 
 ### Configuration Options
@@ -62,6 +70,10 @@ NEXGEN_CUSTOM_ENDPOINT=https://custom-endpoint.com
 | `NEXGEN_CALLBACK_URL` | Default callback URL for webhooks | No | - |
 | `NEXGEN_REDIRECT_URL` | Default redirect URL after payment | No | - |
 | `NEXGEN_CUSTOM_ENDPOINT` | Custom API endpoint (only for `custom` environment) | No | - |
+| `NEXGEN_QR_ENVIRONMENT` | QR API environment: `production` or `custom` | No | `production` |
+| `NEXGEN_QR_TERMINAL_CODE` | Default terminal code for QR payments | No | - |
+| `NEXGEN_QR_CALLBACK_URL` | Default callback URL for QR payment webhooks | No | - |
+| `NEXGEN_QR_CUSTOM_ENDPOINT` | Custom QR API endpoint (only for `custom` QR environment) | No | - |
 
 ## Usage
 
@@ -88,15 +100,40 @@ You can also create a client instance manually:
 
 ```php
 use Reliva\Nexgen\NexgenClient;
-use Reliva\Nexgen\Enum\NexgenEnvironment;
 
 $nexgen = new NexgenClient(
     apiKey: 'your_api_key',
     apiSecret: 'your_api_secret',
-    environment: NexgenEnvironment::PRODUCTION,
+    environment: 'production', // 'sandbox', 'production', or 'custom'
     collectionCode: 'your_collection_code',
     callbackUrl: 'https://your-domain.com/callback',
     redirectUrl: 'https://your-domain.com/redirect'
+);
+```
+
+### QR Client Usage
+
+For QR code payments, use the `NexgenQRClient`:
+
+```php
+use Reliva\Nexgen\NexgenQRClient;
+
+// Via service container
+$nexgenQR = app('nexgen-qr');
+
+// Or via dependency injection
+public function __construct(NexgenQRClient $nexgenQR)
+{
+    $this->nexgenQR = $nexgenQR;
+}
+
+// Or manual instantiation
+$nexgenQR = new NexgenQRClient(
+    apiKey: 'your_api_key',
+    apiSecret: 'your_api_secret',
+    environment: 'production', // 'production' or 'custom'
+    terminalCode: 'your_terminal_code',
+    callbackUrl: 'https://your-domain.com/qr-callback'
 );
 ```
 
@@ -251,6 +288,155 @@ if ($response->isSuccess()) {
 }
 ```
 
+## QR Code Payments
+
+The `NexgenQRClient` provides functionality for generating dynamic QR codes for payments through terminals. This is useful for point-of-sale systems, retail stores, or any scenario where you need to generate QR codes for customers to scan and pay.
+
+### Terminals
+
+Terminals are physical or virtual payment points where QR codes can be generated. Each terminal can have multiple QR code transactions.
+
+#### Create a Terminal
+
+```php
+use Reliva\Nexgen\NexgenQRClient;
+use Reliva\Nexgen\NexgenCreateTerminal;
+
+$nexgenQR = app('nexgen-qr');
+
+$createTerminal = new NexgenCreateTerminal(
+    name: 'Store Counter 1',
+    description: 'Main checkout counter'
+);
+
+$response = $nexgenQR->createTerminal($createTerminal);
+
+if ($response->isSuccess()) {
+    $terminalData = $response->getData();
+    $terminalCode = $terminalData['code'] ?? null;
+    // Store terminal code for future use
+}
+```
+
+**Terminal Name & Description Requirements:**
+- Required (cannot be empty)
+- Minimum length: 5 characters
+- Maximum length: 50 characters
+- Only letters (A-Z, a-z), digits (0-9), hyphens (-), and spaces are allowed
+
+#### Get Terminal List
+
+Retrieve all terminals associated with your account:
+
+```php
+$response = $nexgenQR->getTerminalList();
+
+if ($response->isSuccess()) {
+    $terminals = $response->getData();
+    // Process terminals array
+}
+```
+
+#### Get Terminal Data
+
+Retrieve detailed information for a specific terminal:
+
+```php
+$terminalCode = 'RLVT2TEA0001';
+
+$response = $nexgenQR->getTerminal($terminalCode);
+
+if ($response->isSuccess()) {
+    $terminal = $response->getData();
+    // Process terminal data
+}
+```
+
+If no `$terminalCode` is provided, it will use the default terminal code from your configuration.
+
+#### Get Terminal Data with Billing List
+
+Retrieve terminal data along with all associated QR code transactions:
+
+```php
+$terminalCode = 'RLVT2TEA0001';
+
+$response = $nexgenQR->getTerminalDataBilling($terminalCode);
+
+if ($response->isSuccess()) {
+    $data = $response->getData();
+    $terminal = $data['terminal'] ?? null;
+    $billings = $data['bill_list'] ?? [];
+}
+```
+
+### Dynamic QR Codes
+
+Dynamic QR codes are payment QR codes generated on-demand for specific transactions. Customers scan the QR code to complete payment.
+
+#### Create a Dynamic QR Code
+
+```php
+use Reliva\Nexgen\NexgenQRClient;
+use Reliva\Nexgen\NexgenCreateDynamicQR;
+
+$nexgenQR = app('nexgen-qr');
+
+$createDynamicQR = new NexgenCreateDynamicQR(
+    fieldAmount: '50.00',
+    fieldPaymentDescription: 'Purchase at Store Counter 1',
+    fieldCallbackUrl: 'https://your-domain.com/qr-webhook',
+    fieldExternalReferenceLabel1: 'Order ID',
+    fieldExternalReferenceValue1: 'ORD-12345',
+    fieldExternalReferenceLabel2: 'Customer ID',
+    fieldExternalReferenceValue2: 'CUST-789'
+);
+
+$terminalCode = 'RLVT2TEA0001'; // Optional, uses config default if not provided
+
+$response = $nexgenQR->createDynamicQR($createDynamicQR, $terminalCode);
+
+if ($response->isSuccess()) {
+    $qrData = $response->getData();
+    $qrCode = $qrData['code'] ?? null;
+    $qrImageUrl = $qrData['qr_image_url'] ?? null;
+    $qrString = $qrData['qr_string'] ?? null;
+    
+    // Display QR code to customer
+    // You can use $qrImageUrl to display the QR code image
+    // Or use $qrString to generate your own QR code
+}
+```
+
+**Dynamic QR Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `fieldAmount` | string | Yes | Payment amount (e.g., "50.00") |
+| `fieldPaymentDescription` | string | Yes | Description of the payment |
+| `fieldCallbackUrl` | string | No | Webhook callback URL (uses config default if not provided) |
+| `fieldExternalReferenceLabel1` | string | No | Custom reference label #1 |
+| `fieldExternalReferenceLabel2` | string | No | Custom reference label #2 |
+| `fieldExternalReferenceValue1` | string | No | Custom reference value #1 (required if `fieldExternalReferenceLabel1` provided) |
+| `fieldExternalReferenceValue2` | string | No | Custom reference value #2 (required if `fieldExternalReferenceLabel2` provided) |
+
+#### Get QR Code Data
+
+Retrieve detailed information for a specific QR code transaction:
+
+```php
+$qrCode = 'RLVQ2UE241003AWLB4';
+$terminalCode = 'RLVT2TEA0001'; // Optional
+
+$response = $nexgenQR->getQRData($qrCode, $terminalCode);
+
+if ($response->isSuccess()) {
+    $qrData = $response->getData();
+    $status = $qrData['status'] ?? null; // e.g., 'paid', 'pending', 'expired'
+    // Process QR code data
+}
+```
+
 ## Response Handling
 
 All API methods return a `NexgenResponse` object with the following methods:
@@ -275,45 +461,73 @@ if ($response->isSuccess()) {
 
 ## Environments
 
-The package supports three environments:
+### NexgenClient Environments
 
-### Sandbox (Default)
+The `NexgenClient` supports three environments:
+
+#### Sandbox (Default)
 
 ```php
-use Reliva\Nexgen\Enum\NexgenEnvironment;
-
 $nexgen = new NexgenClient(
     apiKey: 'your_api_key',
     apiSecret: 'your_api_secret',
-    environment: NexgenEnvironment::SANDBOX
+    environment: 'sandbox'
 );
 ```
 
 **Endpoint:** `https://dash-nexgen-stg.reliva.com.my`
 
-### Production
+#### Production
 
 ```php
 $nexgen = new NexgenClient(
     apiKey: 'your_api_key',
     apiSecret: 'your_api_secret',
-    environment: NexgenEnvironment::PRODUCTION
+    environment: 'production'
 );
 ```
 
 **Endpoint:** `https://dash-nexgen.reliva.com.my`
 
-### Custom
+#### Custom
 
 ```php
 $nexgen = new NexgenClient(
     apiKey: 'your_api_key',
     apiSecret: 'your_api_secret',
-    environment: NexgenEnvironment::CUSTOM
+    environment: 'custom'
 );
 ```
 
 **Endpoint:** Uses `NEXGEN_CUSTOM_ENDPOINT` from your configuration.
+
+### NexgenQRClient Environments
+
+The `NexgenQRClient` supports two environments (no sandbox support):
+
+#### Production (Default)
+
+```php
+$nexgenQR = new NexgenQRClient(
+    apiKey: 'your_api_key',
+    apiSecret: 'your_api_secret',
+    environment: 'production'
+);
+```
+
+**Endpoint:** `https://dash-nexgen.reliva.com.my`
+
+#### Custom
+
+```php
+$nexgenQR = new NexgenQRClient(
+    apiKey: 'your_api_key',
+    apiSecret: 'your_api_secret',
+    environment: 'custom'
+);
+```
+
+**Endpoint:** Uses `NEXGEN_QR_CUSTOM_ENDPOINT` from your configuration.
 
 ## Complete Example
 
@@ -323,7 +537,6 @@ Here's a complete example of creating a collection and billing:
 use Reliva\Nexgen\NexgenClient;
 use Reliva\Nexgen\NexgenCreateCollection;
 use Reliva\Nexgen\NexgenCreateBilling;
-use Reliva\Nexgen\Enum\NexgenEnvironment;
 
 // Initialize client
 $nexgen = app('nexgen');
@@ -511,7 +724,7 @@ if ($response->isSuccess()) {
 | `createBilling()` | Create a new billing | `NexgenCreateBilling $createBilling, ?string $collectionCode = null` |
 | `getBillingData()` | Get billing data | `string $billingId, ?string $collectionCode = null` |
 
-### Helper Methods
+### NexgenClient Helper Methods
 
 | Method | Description | Return Type |
 |--------|-------------|-------------|
@@ -521,6 +734,29 @@ if ($response->isSuccess()) {
 | `getApiKey()` | Get API key | `string` |
 | `getApiSecret()` | Get API secret | `string` |
 | `getCollectionCode()` | Get collection code | `string` |
+| `getConfig()` | Get all configuration | `array` |
+
+### NexgenQRClient Methods
+
+| Method | Description | Parameters |
+|--------|-------------|------------|
+| `createTerminal()` | Create a new terminal | `NexgenCreateTerminal $createTerminal` |
+| `getTerminalList()` | Get all terminals | - |
+| `getTerminal()` | Get terminal data | `?string $terminalCode = null` |
+| `getTerminalDataBilling()` | Get terminal with billing list | `?string $terminalCode = null` |
+| `createDynamicQR()` | Create a dynamic QR code | `NexgenCreateDynamicQR $createDynamicQR, ?string $terminalCode = null` |
+| `getQRData()` | Get QR code data | `string $qr_code, ?string $terminalCode = null` |
+
+### NexgenQRClient Helper Methods
+
+| Method | Description | Return Type |
+|--------|-------------|-------------|
+| `getEndpoint()` | Get current API endpoint | `string` |
+| `getEnvironment()` | Get current environment | `string` |
+| `getApiKey()` | Get API key | `string` |
+| `getApiSecret()` | Get API secret | `string` |
+| `getTerminalCode()` | Get terminal code | `string` |
+| `getCallbackUrl()` | Get callback URL | `string` |
 | `getConfig()` | Get all configuration | `array` |
 
 
