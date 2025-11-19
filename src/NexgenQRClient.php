@@ -216,15 +216,15 @@ class NexgenQRClient
         }
 
         $dynamicQRRequest = [
-            'amount' => $amount,
-            'paymentDescription' => $paymentDescription,
-            'callbackUrl' => $callbackUrl,
+            'fieldAmount' => $amount,
+            'fieldPaymentDescription' => $paymentDescription,
+            'fieldCallbackUrl' => $callbackUrl,
                 // Optional external references, only include if not null
                 ...array_filter([
-                    'externalReferenceLabel1' => $externalReferenceLabel1,
-                    'externalReferenceValue1' => $externalReferenceValue1,
-                    'externalReferenceLabel2' => $externalReferenceLabel2,
-                    'externalReferenceValue2' => $externalReferenceValue2,
+                    'fieldExternalReferenceLabel1' => $externalReferenceLabel1,
+                    'fieldExternalReferenceValue1' => $externalReferenceValue1,
+                    'fieldExternalReferenceLabel2' => $externalReferenceLabel2,
+                    'fieldExternalReferenceValue2' => $externalReferenceValue2,
                 ], function ($value) {
                     return !is_null($value);
                 }),
