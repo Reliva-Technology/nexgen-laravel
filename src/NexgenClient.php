@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Http;
 use Reliva\Nexgen\NexgenCreateCollection;
 use Reliva\Nexgen\Enum\NexgenCollectionStatus;
 use Reliva\Nexgen\NexgenCreateBilling;
-use Reliva\Nexgen\Enum\NexgenEnvironment;
 
 class NexgenClient
 {
@@ -64,7 +63,7 @@ class NexgenClient
      *
      * @param string $apiKey - The API key.
      * @param string $apiSecret - The API secret.
-     * @param NexgenEnvironment $environment - The environment.
+     * @param String $environment - The environment.
      * @param string $collectionCode - The code of the collection.
      * @param string $callbackUrl - The callback URL.
      * @param string $redirectUrl - The redirect URL.
@@ -75,7 +74,7 @@ class NexgenClient
     public function __construct(
         ?String $apiKey = null,
         ?String $apiSecret = null,
-        ?NexgenEnvironment $environment = null,
+        ?String $environment = null,
         ?String $collectionCode = null,
         ?String $callbackUrl = null,
         ?String $redirectUrl = null,
@@ -93,13 +92,13 @@ class NexgenClient
         // if environment is production, use the production endpoint
         // if environment is custom, use the custom endpoint
         switch ($this->environment) {
-            case NexgenEnvironment::SANDBOX:
+            case 'sandbox':
                 $this->endpoint = 'https://dash-nexgen-stg.reliva.com.my';
                 break;
-            case NexgenEnvironment::PRODUCTION:
+            case 'production':
                 $this->endpoint = 'https://dash-nexgen.reliva.com.my';
                 break;
-            case NexgenEnvironment::CUSTOM:
+            case 'custom':
                 $this->endpoint = config('nexgen.ENDPOINT');
                 break;
             default:

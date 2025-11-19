@@ -2,8 +2,11 @@
 
 namespace Reliva\Nexgen;
 
-use Reliva\Nexgen\Enum\NexgenQREnvironment;
 use Reliva\Nexgen\NexgenCreateDynamicQR;
+use Illuminate\Support\Facades\Http;
+use Reliva\Nexgen\NexgenResponse;
+use Reliva\Nexgen\NexgenCreateTerminal;
+
 class NexgenQRClient
 {
 
@@ -52,7 +55,7 @@ class NexgenQRClient
     public function __construct(
         ?String $apiKey = null,
         ?String $apiSecret = null,
-        ?NexgenQREnvironment $environment = null,
+        ?String $environment = null,
         ?String $terminalCode = null,
         ?String $callbackUrl = null,
     )
@@ -67,10 +70,10 @@ class NexgenQRClient
         // if environment is production, use the production endpoint
         // if environment is custom, use the custom endpoint
         switch ($this->environment) {
-            case NexgenQREnvironment::PRODUCTION:
+            case 'production':
                 $this->endpoint = 'https://dash-nexgen.reliva.com.my';
                 break;
-            case NexgenQREnvironment::CUSTOM:
+            case 'custom':
                 $this->endpoint = config('nexgen.QR_ENDPOINT');
                 break;
             default:
