@@ -171,9 +171,9 @@ class NexgenQRClient
         $description = $createTerminal->getDescription();
 
         return $this->makePostRequest('api/v1/terminal/create', [
-            'name' => $name,
-            'description' => $description,
-            'status' => 'active',
+            'fieldName' => $name,
+            'fieldDescription' => $description,
+            'fieldStatus' => 'active',
         ]);
     }
 
