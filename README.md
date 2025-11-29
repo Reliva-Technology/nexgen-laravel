@@ -44,9 +44,12 @@ This will create a `config/nexgen.php` file in your Laravel application.
 Add the following environment variables to your `.env` file:
 
 ```text
+# Nexgen API Configuration
 NEXGEN_ENVIRONMENT=sandbox
-NEXGEN_API_KEY=your_api_key_here
-NEXGEN_API_SECRET=your_api_secret_here
+NEXGEN_PROD_API_KEY=your_production_api_key_here
+NEXGEN_PROD_API_SECRET=your_production_api_secret_here
+NEXGEN_SANDBOX_API_KEY=your_sandbox_api_key_here
+NEXGEN_SANDBOX_API_SECRET=your_sandbox_api_secret_here
 NEXGEN_COLLECTION_CODE=your_collection_code_here
 NEXGEN_CALLBACK_URL=https://your-domain.com/callback
 NEXGEN_REDIRECT_URL=https://your-domain.com/redirect
@@ -54,26 +57,40 @@ NEXGEN_CUSTOM_ENDPOINT=https://custom-endpoint.com
 
 # QR Code Payment Configuration
 NEXGEN_QR_ENVIRONMENT=production
+NEXGEN_QR_PROD_API_KEY=your_qr_production_api_key_here
+NEXGEN_QR_PROD_API_SECRET=your_qr_production_api_secret_here
 NEXGEN_QR_TERMINAL_CODE=your_terminal_code_here
 NEXGEN_QR_CALLBACK_URL=https://your-domain.com/qr-callback
 NEXGEN_QR_CUSTOM_ENDPOINT=https://custom-qr-endpoint.com
 ```
+
+**Note:** The package automatically selects the appropriate API keys based on the `NEXGEN_ENVIRONMENT` setting:
+- When `NEXGEN_ENVIRONMENT=sandbox`, it uses `NEXGEN_SANDBOX_API_KEY` and `NEXGEN_SANDBOX_API_SECRET`
+- When `NEXGEN_ENVIRONMENT=production` or `custom`, it uses `NEXGEN_PROD_API_KEY` and `NEXGEN_PROD_API_SECRET`
+
+For QR API, the package uses the QR-specific keys (`NEXGEN_QR_PROD_API_KEY` and `NEXGEN_QR_PROD_API_SECRET`) for both production and custom environments.
 
 ### Configuration Options
 
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
 | `NEXGEN_ENVIRONMENT` | Environment: `sandbox`, `production`, or `custom` | Yes | `sandbox` |
-| `NEXGEN_API_KEY` | Your Nexgen API key | Yes | - |
-| `NEXGEN_API_SECRET` | Your Nexgen API secret | Yes | - |
+| `NEXGEN_PROD_API_KEY` | Your Nexgen Production API key | Yes* | - |
+| `NEXGEN_PROD_API_SECRET` | Your Nexgen Production API secret | Yes* | - |
+| `NEXGEN_SANDBOX_API_KEY` | Your Nexgen Sandbox API key | Yes* | - |
+| `NEXGEN_SANDBOX_API_SECRET` | Your Nexgen Sandbox API secret | Yes* | - |
 | `NEXGEN_COLLECTION_CODE` | Default collection code | No | - |
 | `NEXGEN_CALLBACK_URL` | Default callback URL for webhooks | No | - |
 | `NEXGEN_REDIRECT_URL` | Default redirect URL after payment | No | - |
 | `NEXGEN_CUSTOM_ENDPOINT` | Custom API endpoint (only for `custom` environment) | No | - |
 | `NEXGEN_QR_ENVIRONMENT` | QR API environment: `production` or `custom` | No | `production` |
+| `NEXGEN_QR_PROD_API_KEY` | Your Nexgen QR Production API key | Yes* | - |
+| `NEXGEN_QR_PROD_API_SECRET` | Your Nexgen QR Production API secret | Yes* | - |
 | `NEXGEN_QR_TERMINAL_CODE` | Default terminal code for QR payments | No | - |
 | `NEXGEN_QR_CALLBACK_URL` | Default callback URL for QR payment webhooks | No | - |
 | `NEXGEN_QR_CUSTOM_ENDPOINT` | Custom QR API endpoint (only for `custom` QR environment) | No | - |
+
+\* Required based on environment: Sandbox keys required when using `sandbox` environment, Production keys required when using `production` or `custom` environment.
 
 ## Usage
 
@@ -85,6 +102,7 @@ The package automatically registers a service container binding. You can access 
 use Reliva\Nexgen\NexgenClient;
 
 // Initialize the NexgenClient instance
+// API keys are automatically selected based on NEXGEN_ENVIRONMENT
 protected NexgenClient $client;
 
     public function __construct()
@@ -93,17 +111,28 @@ protected NexgenClient $client;
     }
 ```
 
+**Note:** When you don't provide `apiKey` and `apiSecret` parameters, the package automatically selects the appropriate keys from your configuration based on the `NEXGEN_ENVIRONMENT` setting.
+
 ### Manual Instantiation
 
-You can also create a client instance manually:
+You can also create a client instance manually. If you omit `apiKey` and `apiSecret`, the package will automatically use the environment-appropriate keys from your configuration:
 
 ```php
 use Reliva\Nexgen\NexgenClient;
 
+// Automatic key selection based on environment
+$nexgen = new NexgenClient(
+    environment: 'production', // 'sandbox', 'production', or 'custom'
+    collectionCode: 'your_collection_code',
+    callbackUrl: 'https://your-domain.com/callback',
+    redirectUrl: 'https://your-domain.com/redirect'
+);
+
+// Or explicitly provide keys to override config
 $nexgen = new NexgenClient(
     apiKey: 'your_api_key',
     apiSecret: 'your_api_secret',
-    environment: 'production', // 'sandbox', 'production', or 'custom'
+    environment: 'production',
     collectionCode: 'your_collection_code',
     callbackUrl: 'https://your-domain.com/callback',
     redirectUrl: 'https://your-domain.com/redirect'
@@ -117,8 +146,8 @@ For QR code payments, use the `NexgenQRClient`:
 ```php
 use Reliva\Nexgen\NexgenQRClient;
 
-
 // Initialize the NexgenQRClient instance
+// QR API keys are automatically selected based on NEXGEN_QR_ENVIRONMENT
 protected NexgenQRClient $client;
 
 public function __construct()
@@ -126,16 +155,25 @@ public function __construct()
     $this->client = new NexgenQRClient();
 }
 
-
 // Or manual instantiation
+// Automatic key selection based on QR environment
 $nexgenQR = new NexgenQRClient(
-    apiKey: 'your_api_key',
-    apiSecret: 'your_api_secret',
     environment: 'production', // 'production' or 'custom'
     terminalCode: 'your_terminal_code',
     callbackUrl: 'https://your-domain.com/qr-callback'
 );
+
+// Or explicitly provide QR keys to override config
+$nexgenQR = new NexgenQRClient(
+    apiKey: 'your_qr_api_key',
+    apiSecret: 'your_qr_api_secret',
+    environment: 'production',
+    terminalCode: 'your_terminal_code',
+    callbackUrl: 'https://your-domain.com/qr-callback'
+);
 ```
+
+**Note:** The QR client uses separate QR-specific API keys (`NEXGEN_QR_PROD_API_KEY` and `NEXGEN_QR_PROD_API_SECRET`) which are different from the regular API keys.
 
 ## Collections
 
@@ -463,71 +501,71 @@ if ($response->isSuccess()) {
 
 ### NexgenClient Environments
 
-The `NexgenClient` supports three environments:
+The `NexgenClient` supports three environments. API keys are automatically selected based on the environment when not explicitly provided:
 
 #### Sandbox (Default)
 
 ```php
+// Automatic key selection - uses NEXGEN_SANDBOX_API_KEY and NEXGEN_SANDBOX_API_SECRET
 $nexgen = new NexgenClient(
-    apiKey: 'your_api_key',
-    apiSecret: 'your_api_secret',
     environment: 'sandbox'
 );
 ```
 
-**Endpoint:** `https://dash-nexgen-stg.reliva.com.my`
+**Endpoint:** `https://dash-nexgen-stg.reliva.com.my`  
+**API Keys Used:** `NEXGEN_SANDBOX_API_KEY` and `NEXGEN_SANDBOX_API_SECRET`
 
 #### Production
 
 ```php
+// Automatic key selection - uses NEXGEN_PROD_API_KEY and NEXGEN_PROD_API_SECRET
 $nexgen = new NexgenClient(
-    apiKey: 'your_api_key',
-    apiSecret: 'your_api_secret',
     environment: 'production'
 );
 ```
 
-**Endpoint:** `https://dash-nexgen.reliva.com.my`
+**Endpoint:** `https://dash-nexgen.reliva.com.my`  
+**API Keys Used:** `NEXGEN_PROD_API_KEY` and `NEXGEN_PROD_API_SECRET`
 
 #### Custom
 
 ```php
+// Automatic key selection - uses NEXGEN_PROD_API_KEY and NEXGEN_PROD_API_SECRET
 $nexgen = new NexgenClient(
-    apiKey: 'your_api_key',
-    apiSecret: 'your_api_secret',
     environment: 'custom'
 );
 ```
 
-**Endpoint:** Uses `NEXGEN_CUSTOM_ENDPOINT` from your configuration.
+**Endpoint:** Uses `NEXGEN_CUSTOM_ENDPOINT` from your configuration.  
+**API Keys Used:** `NEXGEN_PROD_API_KEY` and `NEXGEN_PROD_API_SECRET`
 
 ### NexgenQRClient Environments
 
-The `NexgenQRClient` supports two environments (no sandbox support):
+The `NexgenQRClient` supports two environments (no sandbox support). QR API keys are automatically selected based on the environment when not explicitly provided:
 
 #### Production (Default)
 
 ```php
+// Automatic key selection - uses NEXGEN_QR_PROD_API_KEY and NEXGEN_QR_PROD_API_SECRET
 $nexgenQR = new NexgenQRClient(
-    apiKey: 'your_api_key',
-    apiSecret: 'your_api_secret',
     environment: 'production'
 );
 ```
 
-**Endpoint:** `https://dash-nexgen.reliva.com.my`
+**Endpoint:** `https://dash-nexgen.reliva.com.my`  
+**API Keys Used:** `NEXGEN_QR_PROD_API_KEY` and `NEXGEN_QR_PROD_API_SECRET`
 
 #### Custom
 
 ```php
+// Automatic key selection - uses NEXGEN_QR_PROD_API_KEY and NEXGEN_QR_PROD_API_SECRET
 $nexgenQR = new NexgenQRClient(
-    apiKey: 'your_api_key',
-    apiSecret: 'your_api_secret',
     environment: 'custom'
 );
 ```
 
-**Endpoint:** Uses `NEXGEN_QR_CUSTOM_ENDPOINT` from your configuration.
+**Endpoint:** Uses `NEXGEN_QR_CUSTOM_ENDPOINT` from your configuration.  
+**API Keys Used:** `NEXGEN_QR_PROD_API_KEY` and `NEXGEN_QR_PROD_API_SECRET`
 
 ## Complete Example
 

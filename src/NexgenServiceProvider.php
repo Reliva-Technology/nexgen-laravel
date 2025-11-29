@@ -36,8 +36,8 @@ class NexgenServiceProvider extends IlluminateServiceProvider
 
         $this->app->singleton('nexgen-qr', function ($app) {
             return new NexgenQRClient(
-                config('nexgen.API_KEY'),
-                config('nexgen.API_SECRET'),
+                config('nexgen.QR_API_KEY'),
+                config('nexgen.QR_API_SECRET'),
                 config('nexgen.QR_ENVIRONMENT'),
                 config('nexgen.QR_TERMINAL_CODE'),
                 config('nexgen.QR_CALLBACK_URL'),

@@ -80,9 +80,21 @@ class NexgenClient
         ?String $redirectUrl = null,
 
     ) {
-        $this->apiKey = $apiKey ?? config('nexgen.API_KEY');
-        $this->apiSecret = $apiSecret ?? config('nexgen.API_SECRET');
         $this->environment = $environment ?? config('nexgen.ENVIRONMENT');
+        
+        // Determine API key and secret based on environment if not explicitly provided
+        if ($apiKey === null) {
+            $this->apiKey = config('nexgen.API_KEY');
+        } else {
+            $this->apiKey = $apiKey;
+        }
+        
+        if ($apiSecret === null) {
+            $this->apiSecret = config('nexgen.API_SECRET');
+        } else {
+            $this->apiSecret = $apiSecret;
+        }
+        
         $this->collectionCode = $collectionCode ?? config('nexgen.COLLECTION_CODE');
         $this->callbackUrl = $callbackUrl ?? config('nexgen.CALLBACK_URL');
         $this->redirectUrl = $redirectUrl ?? config('nexgen.REDIRECT_URL');

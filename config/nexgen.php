@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 
 return [
@@ -18,11 +18,27 @@ return [
     // Supported: 'sandbox', 'production', 'custom'
     'ENVIRONMENT' => env('NEXGEN_ENVIRONMENT', 'sandbox'),
 
-    // Your Nexgen API Key (find this in your Nexgen dashboard).
-    'API_KEY' => env('NEXGEN_API_KEY'),
+    // Your Nexgen Production API Key (find this in your Nexgen dashboard).
+    'API_PROD_KEY' => env('NEXGEN_PROD_API_KEY'),
 
-    // Your Nexgen API Secret (find this in your Nexgen dashboard).
-    'API_SECRET' => env('NEXGEN_API_SECRET'),
+    // Your Nexgen Production API Secret (find this in your Nexgen dashboard).
+    'API_PROD_SECRET' => env('NEXGEN_PROD_API_SECRET'),
+
+    // Your Nexgen Production API Key (find this in your Nexgen dashboard).
+    'API_SANDBOX_KEY' => env('NEXGEN_SANDBOX_API_KEY'),
+
+    // Your Nexgen Sandbox API Secret (find this in your Nexgen dashboard).
+    'API_SANDBOX_SECRET' => env('NEXGEN_SANDBOX_API_SECRET'),
+
+    // Computed API key and secret based on ENVIRONMENT
+    // Automatically selects sandbox or production keys based on ENVIRONMENT setting
+    'API_KEY' => env('NEXGEN_ENVIRONMENT', 'sandbox') === 'sandbox'
+        ? env('NEXGEN_SANDBOX_API_KEY')
+        : env('NEXGEN_PROD_API_KEY'),
+
+    'API_SECRET' => env('NEXGEN_ENVIRONMENT', 'sandbox') === 'sandbox'
+        ? env('NEXGEN_SANDBOX_API_SECRET')
+        : env('NEXGEN_PROD_API_SECRET'),
 
     // Nexgen custom endpoint (only used if ENVIRONMENT is set to 'custom').
     // Example: 'https://your-nexgen-endpoint.com'
@@ -49,6 +65,17 @@ return [
 
     // Environment for QR API integration. Supported: 'production' or 'custom'. No sandbox support for QR API.
     'QR_ENVIRONMENT' => env('NEXGEN_QR_ENVIRONMENT', 'production'),
+
+    // Your Nexgen QR Production API Key (find this in your Nexgen dashboard).
+    'QR_API_PROD_KEY' => env('NEXGEN_QR_PROD_API_KEY'),
+
+    // Your Nexgen QR Production API Secret (find this in your Nexgen dashboard).
+    'QR_API_PROD_SECRET' => env('NEXGEN_QR_PROD_API_SECRET'),
+
+    // Computed QR API key and secret based on QR_ENVIRONMENT
+    // QR API only supports production/custom, so always uses production keys
+    'QR_API_KEY' => env('NEXGEN_QR_PROD_API_KEY'),
+    'QR_API_SECRET' => env('NEXGEN_QR_PROD_API_SECRET'),
 
     // Custom endpoint for QR API (used if QR_ENVIRONMENT is 'custom').
     'QR_ENDPOINT' => env('NEXGEN_QR_CUSTOM_ENDPOINT'),

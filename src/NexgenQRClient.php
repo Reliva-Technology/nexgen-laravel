@@ -60,9 +60,21 @@ class NexgenQRClient
         ?String $callbackUrl = null,
     )
     {
-        $this->apiKey = $apiKey ?? config('nexgen.API_KEY');
-        $this->apiSecret = $apiSecret ?? config('nexgen.API_SECRET');
         $this->environment = $environment ?? config('nexgen.QR_ENVIRONMENT');
+        
+        // Determine API key and secret based on QR environment if not explicitly provided
+        if ($apiKey === null) {
+            $this->apiKey = config('nexgen.QR_API_KEY');
+        } else {
+            $this->apiKey = $apiKey;
+        }
+        
+        if ($apiSecret === null) {
+            $this->apiSecret = config('nexgen.QR_API_SECRET');
+        } else {
+            $this->apiSecret = $apiSecret;
+        }
+        
         $this->terminalCode = $terminalCode ?? config('nexgen.QR_TERMINAL_CODE');
         $this->callbackUrl = $callbackUrl ?? config('nexgen.QR_CALLBACK_URL');
 
