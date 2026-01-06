@@ -99,6 +99,9 @@ class NexgenClient
         $this->callbackUrl = $callbackUrl ?? config('nexgen.CALLBACK_URL');
         $this->redirectUrl = $redirectUrl ?? config('nexgen.REDIRECT_URL');
 
+        // Validate environment and required API keys
+        $this->validateConfiguration();
+
         // Set endpoint based on environment
         // if environment is sandbox, use the sandbox endpoint
         // if environment is production, use the production endpoint
@@ -115,6 +118,57 @@ class NexgenClient
                 break;
             default:
                 throw new \Exception('Invalid environment: ' . $this->environment);
+        }
+    }
+
+    /**
+     * Validate that required environment variables are set based on the selected environment.
+     *
+     * @return void
+     * @throws \InvalidArgumentException
+     */
+    private function validateConfiguration()
+    {
+        // Check if environment is set
+        if (empty($this->environment)) {
+            throw new \InvalidArgumentException(
+                'NexgenClient requires NEXGEN_ENVIRONMENT to be set. ' .
+                'Please set NEXGEN_ENVIRONMENT in your .env file or pass it to the constructor.'
+            );
+        }
+
+        // Check if API key and secret are set
+        if (empty($this->apiKey) || empty($this->apiSecret)) {
+            $missingVars = [];
+            
+            if ($this->environment === 'sandbox') {
+                if (empty($this->apiKey)) {
+                    $missingVars[] = 'NEXGEN_SANDBOX_API_KEY';
+                }
+                if (empty($this->apiSecret)) {
+                    $missingVars[] = 'NEXGEN_SANDBOX_API_SECRET';
+                }
+                
+                throw new \InvalidArgumentException(
+                    'NexgenClient requires the following environment variables to be set when using "sandbox" environment: ' .
+                    implode(', ', $missingVars) . '. ' .
+                    'Please set these in your .env file or pass them to the constructor.'
+                );
+            } else {
+                // production or custom environment
+                if (empty($this->apiKey)) {
+                    $missingVars[] = 'NEXGEN_PROD_API_KEY';
+                }
+                if (empty($this->apiSecret)) {
+                    $missingVars[] = 'NEXGEN_PROD_API_SECRET';
+                }
+                
+                throw new \InvalidArgumentException(
+                    'NexgenClient requires the following environment variables to be set when using "' . $this->environment . '" environment: ' .
+                    implode(', ', $missingVars) . '. ' .
+                    'Please set these in your .env file or pass them to the constructor.'
+                );
+            }
         }
     }
 

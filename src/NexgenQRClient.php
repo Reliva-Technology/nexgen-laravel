@@ -78,6 +78,9 @@ class NexgenQRClient
         $this->terminalCode = $terminalCode ?? config('nexgen.QR_TERMINAL_CODE');
         $this->callbackUrl = $callbackUrl ?? config('nexgen.QR_CALLBACK_URL');
 
+        // Validate QR environment and required API keys
+        $this->validateConfiguration();
+
         // Set endpoint based on environment
         // if environment is production, use the production endpoint
         // if environment is custom, use the custom endpoint
@@ -90,6 +93,41 @@ class NexgenQRClient
                 break;
             default:
                 throw new \Exception('Invalid environment: ' . $this->environment);
+        }
+    }
+
+    /**
+     * Validate that required environment variables are set based on the selected QR environment.
+     *
+     * @return void
+     * @throws \InvalidArgumentException
+     */
+    private function validateConfiguration()
+    {
+        // Check if QR environment is set
+        if (empty($this->environment)) {
+            throw new \InvalidArgumentException(
+                'NexgenQRClient requires NEXGEN_QR_ENVIRONMENT to be set. ' .
+                'Please set NEXGEN_QR_ENVIRONMENT in your .env file or pass it to the constructor.'
+            );
+        }
+
+        // Check if API key and secret are set
+        if (empty($this->apiKey) || empty($this->apiSecret)) {
+            $missingVars = [];
+            
+            if (empty($this->apiKey)) {
+                $missingVars[] = 'NEXGEN_QR_PROD_API_KEY';
+            }
+            if (empty($this->apiSecret)) {
+                $missingVars[] = 'NEXGEN_QR_PROD_API_SECRET';
+            }
+            
+            throw new \InvalidArgumentException(
+                'NexgenQRClient requires the following environment variables to be set when using "' . $this->environment . '" environment: ' .
+                implode(', ', $missingVars) . '. ' .
+                'Please set these in your .env file or pass them to the constructor.'
+            );
         }
     }
 

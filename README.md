@@ -92,6 +92,8 @@ For QR API, the package uses the QR-specific keys (`NEXGEN_QR_PROD_API_KEY` and 
 
 \* Required based on environment: Sandbox keys required when using `sandbox` environment, Production keys required when using `production` or `custom` environment.
 
+**Important:** The package automatically validates that required environment variables are set when you instantiate a client. If required keys are missing for the selected environment, an `InvalidArgumentException` will be thrown with a clear error message indicating which variables need to be set.
+
 ## Usage
 
 ### Basic Usage
@@ -112,6 +114,8 @@ protected NexgenClient $client;
 ```
 
 **Note:** When you don't provide `apiKey` and `apiSecret` parameters, the package automatically selects the appropriate keys from your configuration based on the `NEXGEN_ENVIRONMENT` setting.
+
+**Validation:** The client validates that required environment variables are set when instantiated. If validation fails, an `InvalidArgumentException` will be thrown. See the [Error Handling](#error-handling) section for details.
 
 ### Manual Instantiation
 
@@ -174,6 +178,8 @@ $nexgenQR = new NexgenQRClient(
 ```
 
 **Note:** The QR client uses separate QR-specific API keys (`NEXGEN_QR_PROD_API_KEY` and `NEXGEN_QR_PROD_API_SECRET`) which are different from the regular API keys.
+
+**Validation:** The QR client validates that required environment variables are set when instantiated. If validation fails, an `InvalidArgumentException` will be thrown. See the [Error Handling](#error-handling) section for details.
 
 ## Collections
 
@@ -726,6 +732,41 @@ The webhook payload includes the following fields:
 - Additional fields may be present for specific payment methods
 
 ## Error Handling
+
+### Configuration Validation Errors
+
+When instantiating `NexgenClient` or `NexgenQRClient`, the package validates that required environment variables are set. If validation fails, an `InvalidArgumentException` is thrown:
+
+```php
+use Reliva\Nexgen\NexgenClient;
+use InvalidArgumentException;
+
+try {
+    $nexgen = new NexgenClient();
+} catch (InvalidArgumentException $e) {
+    // Handle missing configuration
+    // Example error messages:
+    // - "NexgenClient requires NEXGEN_ENVIRONMENT to be set..."
+    // - "NexgenClient requires the following environment variables to be set when using 'sandbox' environment: NEXGEN_SANDBOX_API_KEY, NEXGEN_SANDBOX_API_SECRET..."
+    
+    \Log::error('Nexgen Configuration Error', [
+        'message' => $e->getMessage()
+    ]);
+    
+    return back()->withErrors([
+        'configuration' => $e->getMessage()
+    ]);
+}
+```
+
+**Common Validation Errors:**
+
+- **Missing Environment:** `NEXGEN_ENVIRONMENT` or `NEXGEN_QR_ENVIRONMENT` not set
+- **Missing Sandbox Keys:** When using `sandbox` environment, `NEXGEN_SANDBOX_API_KEY` and/or `NEXGEN_SANDBOX_API_SECRET` are missing
+- **Missing Production Keys:** When using `production` or `custom` environment, `NEXGEN_PROD_API_KEY` and/or `NEXGEN_PROD_API_SECRET` are missing
+- **Missing QR Keys:** When using `NexgenQRClient`, `NEXGEN_QR_PROD_API_KEY` and/or `NEXGEN_QR_PROD_API_SECRET` are missing
+
+### API Response Errors
 
 Always check the response status before processing data:
 
