@@ -2,8 +2,6 @@
 
 namespace Reliva\Nexgen;
 
-use Reliva\Nexgen\Enum\NexgenCollectionStatus;
-
 class NexgenCreateTerminal
 {
     public String $name;
