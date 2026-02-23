@@ -2,7 +2,7 @@
     "name": "reliva/nexgen",
     "description": "NexGen Payment Gateway Integration for Laravel",
     "type": "library",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "license": "MIT",
     "authors": [
         {
