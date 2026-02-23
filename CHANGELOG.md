@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-02-23
+
 ### Added
 - `NexgenQRClient` class for QR code payment functionality
 - Terminal management:
@@ -65,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API key and secret authentication
 - Secure API request handling with proper headers
 
-[Unreleased]: https://github.com/reliva/nexgen-laravel-package/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/reliva/nexgen-laravel-package/releases/tag/v1.0.0
+[Unreleased]: https://github.com/Reliva-Technology/nexgen-laravel/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/Reliva-Technology/nexgen-laravel/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/Reliva-Technology/nexgen-laravel/releases/tag/v1.0.0
 

@@ -2,6 +2,8 @@
 
 Laravel package for the Nexgen Payment Gateway API: Online Banking, MPGS and Duitnow Dynamic QR.
 
+**Source:** [github.com/Reliva-Technology/nexgen-laravel](https://github.com/Reliva-Technology/nexgen-laravel)
+
 ## Features
 
 - **Collections & billings** — Create collections, create billings, get payment URLs for Online Banking / MPGS

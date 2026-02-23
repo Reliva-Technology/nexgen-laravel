@@ -12,7 +12,7 @@
  *
  * Publish this config: php artisan vendor:publish --tag=nexgen-config
  *
- * @see https://github.com/reliva/nexgen
+ * @see https://github.com/Reliva-Technology/nexgen-laravel
  */
 
 return [

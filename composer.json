@@ -10,6 +10,10 @@
             "email": "jhanarthananraja@reliva.com.my"
         }
     ],
+    "homepage": "https://github.com/Reliva-Technology/nexgen-laravel",
+    "support": {
+        "source": "https://github.com/Reliva-Technology/nexgen-laravel"
+    },
     "require": {
         "php": "^8.1"
     },
